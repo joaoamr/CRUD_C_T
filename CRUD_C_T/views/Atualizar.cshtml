@@ -1,0 +1,35 @@
+﻿@{ 
+    if (IsPost)
+    {
+        List<Telefone> telefones = new List<Telefone>();
+
+        string chave = Request.Form["chave"];
+        string nome = Request.Form["nome"];
+        string cpf = Request.Form["cpf"];
+        string genero = Request.Form["genero"];
+        string datanascimento = Request.Form["datanascimento"];
+
+        TelefoneController tc = new TelefoneController();
+        tc.Delete(chave);
+
+        Cliente c = new Cliente(nome, cpf, genero[0], datanascimento);
+        ClienteController cc = new ClienteController();
+
+        cc.Update(chave, c);
+
+        int i = 1;
+
+        while (Request.Form["ddd_at" + i] != null)
+        {
+            string DDD = Request.Form["ddd_at" + i];
+            string telefone = Request.Form["telefone_at" + i];
+            Telefone tel = new Telefone(DDD, telefone, cpf);
+            telefones.Add(tel);
+            i++;
+        }
+
+        tc.Put(telefones);
+    }
+}
+
+<meta http-equiv="refresh" content="1; url = /index.cshtml#!/app" />

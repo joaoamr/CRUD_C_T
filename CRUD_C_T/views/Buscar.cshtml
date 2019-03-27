@@ -1,0 +1,129 @@
+﻿@{
+    var categoria = Request.Form["categoria"];
+    string texto = Request.Form["texto"];
+
+    ClienteController cc = new ClienteController();
+    TelefoneController tc = new TelefoneController();
+    var nomes = "";
+    var cpfs = "";
+    var datanascimentos = "";
+    var generos = "";
+    var numeros = "";
+
+    if (categoria == "tudo")
+    {
+        List<Cliente> clientes = cc.LoadAll();
+
+        for (int i = 0; i < clientes.Count; i++)
+        {
+            nomes += clientes[i].Nome + "|";
+            cpfs += clientes[i].Cpf + "|";
+            datanascimentos += clientes[i].Datanascimento + "|";
+            string g;
+            if (clientes[i].Genero == 'f')
+            {
+                g = "Feminino";
+            }
+            else
+            {
+                g = "Masculino";
+            }
+
+            generos += g + "|";
+            numeros += tc.SearchNumber(clientes[i].Cpf) + "|";
+        }
+    }
+
+    if (categoria == "nome")
+    {
+        List<Cliente> clientes = cc.SearchForNome(texto);
+
+        for (int i = 0; i < clientes.Count; i++)
+        {
+            nomes += clientes[i].Nome + "|";
+            cpfs += clientes[i].Cpf + "|";
+            datanascimentos += clientes[i].Datanascimento + "|";
+            string g;
+            if (clientes[i].Genero == 'f')
+            {
+                g = "Feminino";
+            }
+            else
+            {
+                g = "Masculino";
+            }
+
+            generos += g + "|";
+            numeros += tc.SearchNumber(clientes[i].Cpf) + "|";
+        }
+    }
+
+    if (categoria == "cpf")
+    {
+        Cliente c = cc.SearchForCPF(texto);
+        if (c != null)
+        {
+            nomes += c.Nome +"|";
+            cpfs += c.Cpf + "|";
+            datanascimentos += c.Datanascimento + "|";
+            string g;
+            if (c.Genero == 'f')
+            {
+                g = "Feminino";
+            }
+            else
+            {
+                g = "Masculino";
+            }
+
+            generos += g + "|";
+            numeros = tc.SearchNumber(c.Cpf) + "|";
+        }
+    }
+
+    if(categoria == "telefone")
+    {
+        List<String> cpflist = tc.SearchCpf(texto);
+
+        List<Cliente> clientes = new List<Cliente>();
+
+        for(int i = 0; i < cpflist.Count; i++)
+        {
+            Cliente c = cc.SearchForCPF(cpflist[i]);
+            clientes.Add(c);
+        }
+
+        for (int i = 0; i < clientes.Count; i++)
+        {
+            nomes += clientes[i].Nome + "|";
+            cpfs += clientes[i].Cpf + "|";
+            datanascimentos += clientes[i].Datanascimento + "|";
+            string g;
+            if (clientes[i].Genero == 'f')
+            {
+                g = "Feminino";
+            }
+            else
+            {
+                g = "Masculino";
+            }
+
+            generos += g + "|";
+            numeros += tc.SearchNumber(clientes[i].Cpf) + "|";
+        }
+    }
+
+    /*string response = "nomes: " + nomes;
+    response += "cpfs: " + cpfs;
+    response += "datanascimentos: " + datanascimentos;
+    response += "generos: " + generos;
+    response += "telefones: " + numeros + "}";
+    Response.Write(response);*/
+
+    string response = nomes;
+    response += "\n" + cpfs;
+    response += "\n" + datanascimentos;
+    response += "\n" + generos;
+    response += "\n" + numeros;
+    Response.Write(response);
+}

@@ -1,0 +1,26 @@
+﻿@using System.Collections
+@using System.Data;
+@using System.Data.SqlClient;
+
+@{
+    string response = "";
+    if (IsPost)
+    {
+        string CPF;
+        ClienteController cc = new ClienteController();
+        int rows = cc.Rows();
+        response += "rows " + rows + "\n";
+        for (int i = 0; i < rows; i++)
+        {
+            CPF = Request.Form["reg" + i];
+            response += "reg"+i + " " + CPF + "\n";
+            if (CPF != null)
+            {
+                cc.Delete(CPF);
+            }
+
+        }
+    }
+
+    Response.Write(response);
+}

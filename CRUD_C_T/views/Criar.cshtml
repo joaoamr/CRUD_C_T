@@ -1,0 +1,63 @@
+﻿@using System.Collections
+@using System.Data;
+@using System.Data.SqlClient;
+
+@{
+    var clienteSuccess = true;
+    var telefoneSuccess = true;
+
+    if (IsPost)
+    {
+        List<Telefone> telefones = new List<Telefone>();
+
+        string nome = Request.Form["nome"];
+        string cpf = Request.Form["cpf"];
+        string genero = Request.Form["genero"];
+        string datanascimento = Request.Form["datanascimento"];
+
+        Cliente c = new Cliente(nome, cpf, genero[0], datanascimento);
+
+        ClienteController cc = new ClienteController();
+
+        if (!cc.Put(c))
+        {
+            clienteSuccess = false;
+            return;
+        }
+
+
+        int i = 1;
+
+        while (Request.Form["ddd" + i] != null)
+        {
+            string DDD = Request.Form["ddd" + i];
+            string telefone = Request.Form["telefone" + i];
+            Telefone tel = new Telefone(DDD, telefone, cpf);
+            telefones.Add(tel);
+            i++;
+        }
+
+        TelefoneController tc = new TelefoneController();
+        if (!tc.Put(telefones))
+        {
+            telefoneSuccess = false;
+        }
+
+        string response;
+
+        if (!clienteSuccess) {
+            response = "Não foi possível adicionar os dados sobre cliente. Verifique se os dados estão corretos ou se o valor de CPF já não cadastrado anterioremente.";
+        }
+        else {
+            if (!telefoneSuccess) {
+                response = "O cliente foi cadastrado mas não foi possível adicionar os telefones. Verifique se o(s) número(s) inseridos estão corretos e tente atualizar o registro do cliente cadastrado.";
+            }
+            else {
+                response = "Cadastro realizado com sucesso.";
+            }
+        }
+
+        Response.Write(response);
+    }
+
+}

@@ -1,0 +1,418 @@
+﻿<html>
+<head>
+    <title>CRUD - Cliente e Telefone</title>
+    <style>
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        body {
+            padding: 0px;
+            margin: 0px;
+            background-color: lightgray;
+        }
+
+        .operadores {
+            float: left;
+            padding: 5px
+        }
+
+        .painel {
+            background-color: darkgrey;
+            height: 500px;
+            float: right;
+            width: 1170px;
+            margin-right: 30px;
+            margin-top: 15px;
+            overflow: auto;
+            border: outset
+        }
+
+        .titulocoluna {
+            background-color: black;
+            color: white;
+            margin: auto;
+            padding: 7px;
+            border-bottom: solid gray;
+        }
+
+        .buttonAdd {
+            height: 100px;
+            width: 100px;
+            padding: 0px;
+            border: none;
+            background-color:lightgray;
+            background-image: url("Images/adicionar.png");
+            background-repeat: no-repeat;
+        }
+
+        .buttonRemove {
+            height: 100px;
+            width: 100px;
+            padding: 0px;
+            border: none;
+            background-color: lightgray;
+            background-image: url("Images/remover.png");
+            background-repeat: no-repeat;
+        }
+
+        .buttonBuscar {
+            height: 100px;
+            width: 100px;
+            padding: 0px;
+            border: none;
+            background-color: lightgray;
+            background-image: url("Images/buscar.png");
+            background-repeat: no-repeat;
+        }
+
+        .buttonListar {
+            height: 100px;
+            width: 105px;
+            padding: 0px;
+            border: none;
+            background-color: lightgray;
+            background-image: url("Images/listar.png");
+            background-repeat: no-repeat;
+        }
+
+        .botao{
+            background-color: darkslategrey;
+            color: white;
+            
+        }
+    </style>
+</head>
+<body onload="carregarResultados()">
+    <div class="operadores">
+        <button type="button" id="Add" class="buttonAdd" onclick="abrirDiv('adicionarCliente')"></button><br>
+        <button type="button" id="Remove" class="buttonRemove" onclick="abrirDiv('remover')"></button><br>
+        <button type="button" id="Buscar" class="buttonBuscar" onclick="abrirDiv('pesquisar')"></button><br>
+        <button type="button" id="Listar" class="buttonListar" onclick= "postBusca('tudo', '')"></button>
+    </div>
+    <div class="painel">
+
+        <!--Formulário de criação-->
+        <div id="adicionarCliente" style="display: none">
+            <form id="formCriacao" method="post" name="fadicionar" onsubmit="return processarFormAdicionar()">
+                Nome: <input type="text" name="nome" style="width: 300px">
+                CPF: <input type="number" name="cpf" style="width: 100px">
+                Data de nascimento: <input type="date" name="datanascimento" style="width: 140px" ;>
+                Genero: <input type="radio" name="genero" value="masculino" checked> Masculino <input type="radio" name="genero" value="feminino"> Feminino
+                <button type="button" id="FecharCliente" style="float: right;" onclick="fecharDiv('adicionarCliente')" class="botao">X</button><br>
+                <div id="Telefones">
+                    Telefones (DDD + Númmero): <button type="button" onclick="addTel()" class="botao">+</button> <button type="button" onclick="removeTel()" class="botao">-</button><br>
+                </div>
+                <input type="submit" value="Adicionar Cliente" class="botao">
+            </form>
+        </div>
+
+        <!--Formulário de pesquisa-->
+        <div id="pesquisar" style="display: none">
+            <form id="formPesquisa" method="get" name="fpesquisar" onsubmit="return processarFormBusca()">
+                <input type="text" name="texto" style="width: 400px"> <input type="submit" value="Buscar" class="botao"> <button type="button" id="FecharCliente" style="float: right;" onclick="fecharDiv('pesquisar')" class="botao">X</button><br>
+                Pesquisar por: <input type="radio" name="categoria" value="nome" checked> Nome <input type="radio" name="categoria" value="cpf"> CPF <input type="radio" name="categoria" value="telefone"> Telefone
+            </form>
+        </div>
+
+        <!--Formulário de atualização-->
+        <div id="atualizar" style="display: none">
+            <form id="formAtualizar" method="post" name="fatualizar" onsubmit="return processarFormAtualizar()">
+                <input type="text" id="chave_at" name="chave" style="display:none">
+                Nome: <input type="text" id = "nome_at" name="nome" style="width: 300px">
+                CPF: <input type="number"  id = "cpf_at" name="cpf" style="width: 100px">
+                Data de nascimento: <input type="date"  id = "data_at" name="datanascimento" style="width: 140px" ;>
+                Genero: <input type="radio" id="masc_at" name="genero" value="masculino"> Masculino <input type="radio" id="fem_at" name="genero" value="feminino"> Feminino
+                <button type="button" id="FecharCliente" style="float: right;" onclick="fecharDiv('atualizar')" class="botao">X</button><br>
+                <div id="Telefones_at">
+                    Telefones (DDD + Númmero): <button type="button" onclick="addTel_at()" class="botao">+</button> <button type="button" onclick="removeTel_at()" class="botao">-</button><br>
+                </div>
+                <input type="submit" value="Atualizar Cliente" class="botao">
+            </form>
+        </div>
+
+        <form id="formRemover" method="post" name="fremover" onsubmit="return processarFormRemover()">
+
+            <!--Formulário de remoção-->
+            <div id="remover" style="display: none">
+                Remover registros selecionados? <input type="submit" value="Confirmar" class="botao"> <button type="button" id="FecharCliente" onclick="fecharDiv('remover')" class="botao">Cancelar</button><br>
+            </div>
+
+            <!--Tabela-->
+            <div id="colunaSelecao" style="float:left; width: 50px; overflow-x:auto;">
+                <div class="titulocoluna"><br></div>
+            </div>
+
+            <div id="colunaNome" style="float:left; width: 330px; overflow-x:auto;">
+                <div class="titulocoluna"><a>Nome</a></div>
+            </div>
+
+            <div id="colunaCPF" style="float:left; width: 200px; overflow-x:auto;">
+                <div class="titulocoluna"><a>CPF</a></div>
+            </div>
+
+            <div id="colunaDataNascimento" style="float:left; width: 100px; overflow-x:auto;">
+                <div class="titulocoluna"><a>Nascimento</a></div>
+            </div>
+
+            <div id="colunaGenero" style="float:left; width: 120px; overflow-x:auto; ">
+                <div class="titulocoluna"><a>Gênero</a></div>
+            </div>
+
+            <div id="colunaTelefone" style="margin: auto; overflow-x:auto;">
+                <div class="titulocoluna"><a>Telefone</a></div>
+            </div>
+        </form>
+
+    </div>
+</body>
+</html>
+
+<script>
+    var telefones = 0, telefones_at = 0;
+    var ultimabusca_cat;
+    var ultimabusca_txt;
+    var num_reg = 0;
+
+    function processarFormBusca() {
+        var categoria = document.forms["fpesquisar"]["categoria"].value;
+        var texto = document.forms["fpesquisar"]["texto"].value;
+
+        postBusca(categoria, texto);
+        return true;
+    }
+
+    function processarFormRemover() {
+        var request = '';
+        var f = false;
+        for(var i = 0; i < num_reg; i++) {
+            var reg = document.forms["fremover"]["reg" + i].checked;
+            if (reg) {
+                if (f)
+                    request += "&";
+
+                request += "reg" + i + "=" + document.forms["fremover"]["reg" + i].value;
+                f = true;
+            }
+        }
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "/views/Remover.cshtml", false);
+        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhttp.send(request);
+       
+        fecharDiv('remover');
+        postBusca(ultimabusca_cat, ultimabusca_txt);
+    }
+
+    function processarFormAdicionar() {
+        var request = 'nome=' + document.forms["fadicionar"]["nome"].value;
+        request += '&cpf=' + document.forms["fadicionar"]["cpf"].value;
+        request += '&datanascimento=' + document.forms["fadicionar"]["datanascimento"].value;
+        request += '&genero=' + document.forms["fadicionar"]["genero"].value;
+        for (var i = 1; i <= telefones; i++) {
+            request += "&ddd" + i + "=" + document.forms["fadicionar"]["ddd" + i].value;
+            request += "&telefone" + i + "=" + document.forms["fadicionar"]["telefone" + i].value
+        }
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "/views/Criar.cshtml", false);
+        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhttp.send(request);
+        alert(xhttp.responseText);
+    }
+
+    function processarFormAtualizar() {
+        var request = "chave=" + document.forms["fatualizar"]["chave"].value;
+        request += '&nome=' + document.forms["fatualizar"]["nome"].value;
+        request += '&cpf=' + document.forms["fatualizar"]["cpf"].value;
+        request += '&datanascimento=' + document.forms["fatualizar"]["datanascimento"].value;
+        request += '&genero=' + document.forms["fatualizar"]["genero"].value;
+        for (var i = 1; i <= telefones_at; i++) {
+            request += "&ddd_at" + i + "=" + document.forms["fatualizar"]["ddd_at" + i].value;
+            request += "&telefone_at" + i + "=" + document.forms["fatualizar"]["telefone_at" + i].value
+        }
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("POST", "/views/Atualizar.cshtml", false);
+        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        xhttp.send(request);
+        fecharDiv('atualizar');
+        postBusca(ultimabusca_cat, ultimabusca_txt);
+    }
+
+    function postBusca(cat, txt) {
+       ultimabusca_cat = cat;
+       ultimabusca_txt = txt;
+       $.post("/views/Buscar.cshtml",
+            {
+                categoria: cat,
+                texto: txt
+            },
+           function (data, status) {
+                var tokens = data.split("\n");
+
+                var nomes = tokens[0].split("|");
+                var cpfs = tokens[1].split("|");
+                var datanascimentos = tokens[2].split("|");
+                var generos = tokens[3].split("|");
+                var numeros = tokens[4].split("|");
+                
+                limparTabela();
+               carregarResultados(nomes, cpfs, datanascimentos, generos, numeros);
+               num_reg = cpfs.length -1;
+           });
+    }
+
+    function addTel() {
+        telefones++;
+        var id = telefones;
+
+        var dddinput = document.createElement("INPUT");
+        dddinput.setAttribute("type", "number");
+        dddinput.setAttribute("name", "ddd" + id.toString());
+        dddinput.setAttribute("id", "dddbox" + id.toString());
+        dddinput.setAttribute("style", "width : 20px;");
+        document.getElementById("Telefones").appendChild(dddinput);
+
+        var telinput = document.createElement("INPUT");
+        telinput.setAttribute("type", "number");
+        telinput.setAttribute("name", "telefone" + id.toString());
+        telinput.setAttribute("id", "telefonebox" + id.toString());
+        telinput.setAttribute("style", "width : 80px; margin-right: 4px;");
+        document.getElementById("Telefones").appendChild(telinput);
+
+    };
+
+    function addTel_at() {
+        telefones_at++;
+        var id = telefones_at;
+
+        var dddinput = document.createElement("INPUT");
+        dddinput.setAttribute("type", "number");
+        dddinput.setAttribute("name", "ddd_at" + id.toString());
+        dddinput.setAttribute("id", "dddbox_at" + id.toString());
+        dddinput.setAttribute("style", "width : 20px;");
+        document.getElementById("Telefones_at").appendChild(dddinput);
+
+        var telinput = document.createElement("INPUT");
+        telinput.setAttribute("type", "number");
+        telinput.setAttribute("name", "telefone_at" + id.toString());
+        telinput.setAttribute("id", "telefonebox_at" + id.toString());
+        telinput.setAttribute("style", "width : 80px; margin-right: 4px;");
+        document.getElementById("Telefones_at").appendChild(telinput);
+
+    };
+
+    function removeTel() {
+        if (telefones == 0)
+            return;
+
+        var telefonebox = document.getElementById("telefonebox" + telefones.toString());
+        var dddbox = document.getElementById("dddbox" + telefones.toString());
+
+        document.getElementById("Telefones").removeChild(telefonebox);
+        document.getElementById("Telefones").removeChild(dddbox);
+        telefones--;
+    }
+
+    function removeTel_at() {
+        if (telefones_at == 0)
+            return;
+
+        var telefonebox = document.getElementById("telefonebox_at" + telefones_at.toString());
+        var dddbox = document.getElementById("dddbox_at" + telefones_at.toString());
+
+        document.getElementById("Telefones_at").removeChild(telefonebox);
+        document.getElementById("Telefones_at").removeChild(dddbox);
+        telefones_at--;
+    }
+
+    function fecharDiv(divid) {
+        var div = document.getElementById(divid);
+        div.setAttribute("style", "display: none;");
+        
+    }
+
+    function abrirDiv(divid) {
+        var div = document.getElementById(divid);
+        div.setAttribute("style", "padding: 5px; overflow - x: auto;  margin: 5px; border: solid black 1px;");
+    }
+    
+    function carregarFormularioAtualizacao(cpf, nome, datanascimento, genero, numero) {
+        abrirDiv("atualizar");
+        while (telefones_at > 0)
+            removeTel_at();
+
+        document.getElementById("nome_at").setAttribute("value", nome);
+        document.getElementById("cpf_at").setAttribute("value", cpf);
+        document.getElementById("chave_at").setAttribute("value", cpf);
+        document.getElementById("data_at").setAttribute("value", datanascimento);
+
+        if (genero == 'Feminino')
+            document.getElementById("fem_at").setAttribute("checked", true);
+        else
+            document.getElementById("masc_at").setAttribute("checked", true);
+
+        if (numero == " " || numero == "")
+            return;
+
+        var tels = numero.split(" ");
+
+        for (var i = 0; i < tels.length - 1; i++) {
+            if (tels[i] == " " || tels[i] == "")
+                continue;
+            addTel_at();
+        }
+
+        for (var i = 0; i < tels.length; i++) {
+            if (tels[i] == " " || tels[i] == "")
+                continue;
+            var ddd = tels[i][1] + tels[i][2];
+            var num = tels[i].substring(4);
+            document.getElementById("dddbox_at" + (i+1).toString()).setAttribute("value", ddd);
+            document.getElementById("telefonebox_at" + (i+1).toString()).setAttribute("value", num);
+        }
+
+    }
+
+    
+
+    function carregarResultados(nomes, cpfs, datanascimentos, generos, numeros) {
+    for (var i = 0; i < nomes.length - 1; i++) {
+            var color = "white";
+            if (i % 2 == 1)
+                color = "lightgray";
+
+            document.getElementById("colunaNome").innerHTML += "<div id = \"" + cpfs[i] + ".0\" style = \"overflow-x: auto; height: 25px; padding-top: 2px; background-color:" + color + "\">" + nomes[i] + "</div>";
+            document.getElementById("colunaCPF").innerHTML += "<div id = \"" + cpfs[i] + ".1\" style = \"overflow-x: auto; height: 25px; padding-top: 2px; background-color:" + color + "\">" + cpfs[i] + "</div>";
+            document.getElementById("colunaDataNascimento").innerHTML += "<div id = \"" + cpfs[i] + ".2\" style = \"overflow-x: auto; height: 25px; padding-top: 2px; background-color:" + color + "\">" + datanascimentos[i] + "</div>";
+            document.getElementById("colunaGenero").innerHTML += "<div id = \"" + cpfs[i] + ".3\" style = \"overflow-x: auto; height: 25px; padding-top: 2px; background-color:" + color + "\">" + generos[i] + "</div>";
+            document.getElementById("colunaTelefone").innerHTML += "<div id = \"" + cpfs[i] + ".4\" style = \"overflow-x: auto; height: 25px; padding-top: 2px; background-color:" + color + "\">" + numeros[i] + "</div>";
+
+            var input = "<input type=\"checkbox\" id = \""+cpfs[i]+"\" name = \"reg" + i + "\" value = \"" + cpfs[i] + "\">";
+
+            var func = "carregarFormularioAtualizacao('" + cpfs[i] + "','" + nomes[i] + "','" + datanascimentos[i] + "','" + generos[i] + "','" + numeros[i] + "')";
+
+            var button = "<button type=\"button\" class = \"botaoEditar\" id = \""+cpfs[i]+".5\" onclick=\"" + func + "\"></button>";
+
+
+            document.getElementById("colunaSelecao").innerHTML += "<div id = \"" + cpfs[i] + "\" style = \"overflow-x: auto; height: 25px; padding-top: 2px; background-color:" + color + "\">" + input + button + "</div > ";
+        }
+    }
+
+    function limparTabela() {
+        document.getElementById("colunaSelecao").innerHTML = "<div class=\"titulocoluna\"><br></div>";
+        document.getElementById("colunaNome").innerHTML = "<div class=\"titulocoluna\"><a>Nome</a></div>";
+        document.getElementById("colunaDataNascimento").innerHTML = "<div class=\"titulocoluna\"><a>Nascimento</a></div>";
+        document.getElementById("colunaGenero").innerHTML = "<div class=\"titulocoluna\"><a>Genero</a></div>";
+        document.getElementById("colunaTelefone").innerHTML = "<div class=\"titulocoluna\"><a>Telefone</a></div>";
+        document.getElementById("colunaCPF").innerHTML = "<div class=\"titulocoluna\"><a>CPF</a></div>";
+
+    }       
+</script>
+
+
+
+
